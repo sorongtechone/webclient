@@ -526,9 +526,15 @@ function calculateDaysRemaining(deadlineDate, status) {
                 <div className="d-flex align-items-center">
                   <div className="client-avatar">
                     {item.nama ? item.nama.charAt(0).toUpperCase() : 'C'}
+                      {/* BADGE NOMOR KECIL DI POJOK */}
+              <span className="position-absolute top-0 start-100 translate-middle badge bg-primary rounded-pill" 
+                    style={{fontSize: '0.5rem', minWidth: '16px', height: '16px'}}>
+                {startIndex + index + 1}
                   </div>
                   <div>
-                    <h6 className="mb-0 fw-bold">{item.nama || 'Client Tanpa Nama'}</h6>
+                    <h6 className="mb-0 fw-bold">
+                                       <span className="text-primary me-2">#{startIndex + index + 1}</span>
+{item.nama || 'Client Tanpa Nama'}</h6>
                   </div>
                 </div>
                 <span className={`status-badge ${getStatusBadgeClass(item.status)}`}>
@@ -769,35 +775,38 @@ function calculateDaysRemaining(deadlineDate, status) {
                   </tr>
                 </thead>
                 <tbody>
-                  {currentItems.length > 0 ? (
-                    currentItems.map(item => (
-                      <tr key={item.id}>
-                        <td>
-                          <div className="d-flex align-items-center">
-                            <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style={{width: '40px', height: '40px'}}>
-                              {item.nama ? item.nama.charAt(0).toUpperCase() : 'C'}
-                            </div>
-                            <div>
-                              <div className="fw-bold">{item.nama || 'Client Tanpa Nama'}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="align-middle">
-                          <span className="badge bg-light text-dark">
-                            {item.jenis || 'Tidak ditentukan'}
-                          </span>
-                        </td>
-                        <td className="align-middle" title={`Deadline: ${item.waktu}`}>
-  {calculateDaysRemaining(item.waktu, item.status)}
-</td>
-                        <td className="align-middle">
-                          <span className={`status-badge ${getStatusBadgeClass(item.status)}`}>
-                            {item.status || 'Tidak Aktif'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
+                    {currentItems.length > 0 ? (
+          currentItems.map((item, index) => (  // PAKAI INDEX UNTUK NOMOR URUT
+            <tr key={item.id}>
+              <td className="align-middle text-center fw-bold text-muted">
+                {startIndex + index + 1}  {/* NOMOR URUT */}
+              </td>
+              <td>
+                <div className="d-flex align-items-center">
+                  <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style={{width: '40px', height: '40px'}}>
+                    {item.nama ? item.nama.charAt(0).toUpperCase() : 'C'}
+                  </div>
+                  <div>
+                    <div className="fw-bold">{item.nama || 'Client Tanpa Nama'}</div>
+                  </div>
+                </div>
+              </td>
+              <td className="align-middle">
+                <span className="badge bg-light text-dark">
+                  {item.jenis || 'Tidak ditentukan'}
+                </span>
+              </td>
+              <td className="align-middle" title={`Deadline: ${item.waktu}`}>
+                {calculateDaysRemaining(item.waktu, item.status)}
+              </td>
+              <td className="align-middle">
+                <span className={`status-badge ${getStatusBadgeClass(item.status)}`}>
+                  {item.status || 'Tidak Aktif'}
+                </span>
+              </td>
+            </tr>
+          ))
+        ) : : (
                     <tr>
                       <td colSpan="4" className="text-center py-5">
                         {loading ? (
