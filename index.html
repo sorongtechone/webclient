@@ -1,8 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <title>Realtime Client Dashboard</title>
+   <!-- ========================================= -->
+<!-- ICONS & FAVICON SECTION -->
+<!-- ========================================= -->
+
+<!-- Favicon & App Icons -->
+<link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/1688/1688400.png">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/1688/1688400.png">
+
+<!-- Flaticon Icons untuk berbagai keperluan -->
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-regular-straight/css/uicons-regular-straight.css">
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-solid-rounded/css/uicons-solid-rounded.css">
+
+<!-- Social Media & Brand Icons -->
+<link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.1.0/uicons-brands/css/uicons-brands.css">
+
+<!-- ========================================= -->
+<!-- META TAGS SECTION (Tetap sama) -->
+<!-- ========================================= -->
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<!-- Primary Meta Tags -->
+<title>Client.SorongTechOne.com - Dashboard Client Profesional</title>
+<meta name="title" content="Client.SorongTechOne.com - Dashboard Client Profesional">
+<meta name="description" content="Kelola dan pantau semua client proyek IT Anda secara real-time. Website development, mobile apps, dan sistem custom untuk bisnis Anda.">
+<meta name="keywords" content="sorong tech, web development, aplikasi android, website, sistem IT, client dashboard, proyek IT">
+<meta name="author" content="SorongTechOne">
+<meta name="robots" content="index, follow">
+<meta name="language" content="Indonesian">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://client.sorongtechone.com/">
+<meta property="og:title" content="Client.SorongTechOne.com - Dashboard Client Profesional">
+<meta property="og:description" content="Kelola dan pantau semua client proyek IT Anda secara real-time">
+<meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/1688/1688400.png">
+
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://client.sorongtechone.com/">
+<meta property="twitter:title" content="Client.SorongTechOne.com - Dashboard Client Profesional">
+<meta property="twitter:description" content="Kelola dan pantau semua client proyek IT Anda secara real-time">
+<meta property="twitter:image" content="https://cdn-icons-png.flaticon.com/512/1688/1688400.png">
+
+<!-- Theme Color -->
+<meta name="theme-color" content="#4361ee">
+<meta name="msapplication-navbutton-color" content="#4361ee">
+<meta name="apple-mobile-web-app-status-bar-style" content="#4361ee">
+
+<!-- PWA -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="SorongTechOne Client">
+  
+  
+  <!-- Performance -->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="HandheldFriendly" content="true">
+  <meta name="MobileOptimized" content="width">
 
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -125,9 +184,9 @@
     }
     
     .last-updated {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.8); /* Putih dengan sedikit transparansi */
-}
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
     
     .empty-state {
       text-align: center;
@@ -169,6 +228,31 @@
       background-color: var(--primary-color);
       border-color: var(--primary-color);
     }
+
+    /* Mobile Card Styles */
+    .mobile-card {
+      border-radius: 10px;
+      border: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+    }
+    
+    .mobile-card .card-body {
+      padding: 1rem;
+    }
+    
+    .client-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 12px;
+    }
     
     @media (max-width: 768px) {
       .table-responsive {
@@ -177,6 +261,14 @@
       
       .stats-card .card-body {
         padding: 1rem;
+      }
+      
+      .stats-card-mobile {
+        margin-bottom: 0.5rem;
+      }
+      
+      .stats-row-mobile {
+        margin-bottom: 1rem;
       }
     }
   </style>
@@ -194,11 +286,7 @@
     // WAJIB: pakai compat supaya firebase.* tersedia
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-// Untuk set timezone Papua (UTC+9)
-const today = new Date();
-const papuaOffset = 9 * 60; // UTC+9 dalam menit
-const localOffset = today.getTimezoneOffset();
-const papuaTime = new Date(today.getTime() + (localOffset + papuaOffset) * 60000);
+
     function ClientTable() {
       const [data, setData] = React.useState([]);
       const [filteredData, setFilteredData] = React.useState([]);
@@ -228,55 +316,54 @@ const papuaTime = new Date(today.getTime() + (localOffset + papuaOffset) * 60000
 
           const arr = Object.keys(val).map((id) => ({ id, ...val[id] }));
 
-// Urutkan data: On progress -> Pending -> Inactive -> lainnya
-const sortedArr = arr.sort((a, b) => {
-  const getStatusPriority = (status) => {
-    if (!status) return 3; // Inactive
-    const statusLower = status.toLowerCase();
-    if (statusLower.includes("on progress")) return 1; // Paling tinggi
-    if (statusLower.includes("pending")) return 2;
-    if (statusLower.includes("active")) return 1;
-    return 3; // Inactive/others
-  };
-  
-  return getStatusPriority(a.status) - getStatusPriority(b.status);
-});
+          // Urutkan data: On progress -> Pending -> Inactive -> lainnya
+          const sortedArr = arr.sort((a, b) => {
+            const getStatusPriority = (status) => {
+              if (!status) return 3; // Inactive
+              const statusLower = status.toLowerCase();
+              if (statusLower.includes("on progress")) return 1; // Paling tinggi
+              if (statusLower.includes("pending")) return 2;
+              if (statusLower.includes("active")) return 1;
+              return 3; // Inactive/others
+            };
+            
+            return getStatusPriority(a.status) - getStatusPriority(b.status);
+          });
 
-setData(sortedArr);
-setFilteredData(sortedArr);
+          setData(sortedArr);
+          setFilteredData(sortedArr);
         });
         
         return () => refDb.off();
       }, []);
 
       // Filter data based on search term
-      // Filter data based on search term
-React.useEffect(() => {
-  if (searchTerm.trim() === "") {
-    setFilteredData(data);
-  } else {
-    const filtered = data.filter(item => 
-      item.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.jenis?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.status?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    
-    // Urutkan hasil filter juga
-    const sortedFiltered = filtered.sort((a, b) => {
-      const statusA = a.status ? a.status.toLowerCase() : '';
-      const statusB = b.status ? b.status.toLowerCase() : '';
-      
-      if (statusA.includes("on progress") && !statusB.includes("on progress")) return -1;
-      if (!statusA.includes("on progress") && statusB.includes("on progress")) return 1;
-      if (statusA.includes("pending") && !statusB.includes("pending")) return -1;
-      if (!statusA.includes("pending") && statusB.includes("pending")) return 1;
-      return 0;
-    });
-    
-    setFilteredData(sortedFiltered);
-  }
-  setCurrentPage(1);
-}, [searchTerm, data]);
+      React.useEffect(() => {
+        if (searchTerm.trim() === "") {
+          setFilteredData(data);
+        } else {
+          const filtered = data.filter(item => 
+            item.nama?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.jenis?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            item.status?.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+          
+          // Urutkan hasil filter juga
+          const sortedFiltered = filtered.sort((a, b) => {
+            const statusA = a.status ? a.status.toLowerCase() : '';
+            const statusB = b.status ? b.status.toLowerCase() : '';
+            
+            if (statusA.includes("on progress") && !statusB.includes("on progress")) return -1;
+            if (!statusA.includes("on progress") && statusB.includes("on progress")) return 1;
+            if (statusA.includes("pending") && !statusB.includes("pending")) return -1;
+            if (!statusA.includes("pending") && statusB.includes("pending")) return 1;
+            return 0;
+          });
+          
+          setFilteredData(sortedFiltered);
+        }
+        setCurrentPage(1);
+      }, [searchTerm, data]);
 
       const handleRefresh = () => {
         setLoading(true);
@@ -299,61 +386,62 @@ React.useEffect(() => {
       };
 
       const getStatusBadgeClass = (status) => {
-  if (!status) return "status-inactive";
-  
-  const statusLower = status.toLowerCase();
-  if (statusLower.includes("active") || statusLower.includes("on progress")) {
-    return "status-active"; // Ubah ini
-  } else if (statusLower.includes("pending") || statusLower.includes("menunggu")) {
-    return "status-pending";
-  } else {
-    return "status-inactive";
-  }
-};
+        if (!status) return "status-inactive";
+        
+        const statusLower = status.toLowerCase();
+        if (statusLower.includes("active") || statusLower.includes("on progress")) {
+          return "status-active";
+        } else if (statusLower.includes("pending") || statusLower.includes("menunggu")) {
+          return "status-pending";
+        } else {
+          return "status-inactive";
+        }
+      };
 
-     const calculateDaysRemaining = (deadlineDate) => {
-  if (!deadlineDate) return "-";
-  
-  try {
-    // Parse tanggal deadline (format: DD/MM/YYYY)
-    const [day, month, year] = deadlineDate.split('/').map(Number);
-    const deadline = new Date(year, month - 1, day); // month - 1 karena JavaScript month 0-based
-    
-    const today = new Date();
-    
-    // Reset waktu ke 00:00:00 untuk perhitungan yang akurat
-    today.setHours(0, 0, 0, 0);
-    deadline.setHours(0, 0, 0, 0);
-    
-    const diffTime = deadline - today;
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) {
-      return "Hari ini";
-    } else if (diffDays === 1) {
-      return "1 hari lagi";
-    } else if (diffDays > 1) {
-      return `${diffDays} hari lagi`;
-    } else if (diffDays === -1) {
-      return "1 hari terlambat";
-    } else {
-      return `${Math.abs(diffDays)} hari terlambat`;
-    }
-  } catch (e) {
-    return deadlineDate; // Return original jika error parsing
-  }
-};
+      const calculateDaysRemaining = (deadlineDate) => {
+        if (!deadlineDate) return "-";
+        
+        try {
+          // Parse tanggal deadline (format: DD/MM/YYYY)
+          const [day, month, year] = deadlineDate.split('/').map(Number);
+          const deadline = new Date(year, month - 1, day);
+          
+          const today = new Date();
+          
+          // Reset waktu ke 00:00:00 untuk perhitungan yang akurat
+          today.setHours(0, 0, 0, 0);
+          deadline.setHours(0, 0, 0, 0);
+          
+          const diffTime = deadline - today;
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 0) {
+            return "Hari ini";
+          } else if (diffDays === 1) {
+            return "1 hari lagi";
+          } else if (diffDays > 1) {
+            return `${diffDays} hari lagi`;
+          } else if (diffDays === -1) {
+            return "1 hari terlambat";
+          } else {
+            return `${Math.abs(diffDays)} hari terlambat`;
+          }
+        } catch (e) {
+          return deadlineDate;
+        }
+      };
 
-const [currentTime, setCurrentTime] = React.useState(new Date());
+      const [currentTime, setCurrentTime] = React.useState(new Date());
 
-// Timer effect
-React.useEffect(() => {
-  const timer = setInterval(() => {
-    setCurrentTime(new Date());
-  }, 1000);
+      // Timer effect
+      React.useEffect(() => {
+        const timer = setInterval(() => {
+          setCurrentTime(new Date());
+        }, 1000);
 
-  return () => clearInterval(timer);
-}, []);
+        return () => clearInterval(timer);
+      }, []);
+
       const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
       };
@@ -381,7 +469,7 @@ React.useEffect(() => {
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                 >
-                  Previous
+                  Sebelumnya
                 </button>
               </li>
               {pages}
@@ -391,12 +479,48 @@ React.useEffect(() => {
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                 >
-                  Next
+                  Selanjutnya
                 </button>
               </li>
             </ul>
           </nav>
         );
+      };
+
+      // Render mobile cards
+      const renderMobileCards = () => {
+        return currentItems.map(item => (
+          <div key={item.id} className="card mobile-card">
+            <div className="card-body">
+              <div className="d-flex justify-content-between align-items-start mb-2">
+                <div className="d-flex align-items-center">
+                  <div className="client-avatar">
+                    {item.nama ? item.nama.charAt(0).toUpperCase() : 'C'}
+                  </div>
+                  <div>
+                    <h6 className="mb-0 fw-bold">{item.nama || 'Client Tanpa Nama'}</h6>
+                  </div>
+                </div>
+                <span className={`status-badge ${getStatusBadgeClass(item.status)}`}>
+                  {item.status || 'Tidak Aktif'}
+                </span>
+              </div>
+              
+              <div className="row mt-2">
+                <div className="col-6">
+                  <small className="text-muted">Jenis Sistem</small>
+                  <div className="fw-medium">{item.jenis || 'Tidak ditentukan'}</div>
+                </div>
+                <div className="col-6">
+                  <small className="text-muted">Deadline</small>
+                  <div className="fw-medium" title={`Tanggal: ${item.waktu}`}>
+                    {calculateDaysRemaining(item.waktu)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ));
       };
 
       return (
@@ -406,16 +530,16 @@ React.useEffect(() => {
             <div className="row align-items-center">
               <div className="col-md-6">
                 <h1 className="h3 mb-1">
-  <i className="fas fa-laptop-code me-2"></i>
-  Client.SorongTechOne.com
-</h1>
-<p className="mb-0">Client Dashboard</p>
+                  <i className="fas fa-laptop-code me-2"></i>
+                  SorongTechOne.com
+                </h1>
+                <p className="mb-0">Dashboard Client</p>
               </div>
               <div className="col-md-6 text-md-end">
                 <div className="d-flex justify-content-md-end align-items-center gap-3">
                   <div className="last-updated">
-  Waktu Sekarang: {currentTime.toLocaleTimeString()}
-</div>
+                    Waktu Sekarang: {currentTime.toLocaleTimeString()}
+                  </div>
                   <button 
                     className="refresh-btn"
                     onClick={handleRefresh}
@@ -428,82 +552,149 @@ React.useEffect(() => {
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="row mb-4">
-            <div className="col-md-3 mb-3">
-              <div className="card stats-card h-100">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between">
-                    <div>
-                      <h6 className="card-title text-muted mb-2">Total Clients</h6>
-                      <h3 className="mb-0">{data.length}</h3>
+          {/* Stats Cards - Desktop */}
+          <div className="d-none d-md-block">
+            <div className="row mb-4">
+              <div className="col-md-3 mb-3">
+                <div className="card stats-card h-100">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between">
+                      <div>
+                        <h6 className="card-title text-muted mb-2">Total Client</h6>
+                        <h3 className="mb-0">{data.length}</h3>
+                      </div>
+                      <div className="align-self-center">
+                        <i className="fas fa-users fa-2x text-primary"></i>
+                      </div>
                     </div>
-                    <div className="align-self-center">
-                      <i className="fas fa-users fa-2x text-primary"></i>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3 mb-3">
+                <div className="card stats-card h-100">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between">
+                      <div>
+                        <h6 className="card-title text-muted mb-2">Aktif</h6>
+                        <h3 className="mb-0">
+                          {data.filter(item => 
+                            item.status && (
+                              item.status.toLowerCase().includes("active") || 
+                              item.status.toLowerCase().includes("on progress")
+                            )
+                          ).length}
+                        </h3>
+                      </div>
+                      <div className="align-self-center">
+                        <i className="fas fa-check-circle fa-2x text-success"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3 mb-3">
+                <div className="card stats-card h-100">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between">
+                      <div>
+                        <h6 className="card-title text-muted mb-2">Menunggu</h6>
+                        <h3 className="mb-0">
+                          {data.filter(item => 
+                            item.status && item.status.toLowerCase().includes("pending")
+                          ).length}
+                        </h3>
+                      </div>
+                      <div className="align-self-center">
+                        <i className="fas fa-clock fa-2x text-warning"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-md-3 mb-3">
+                <div className="card stats-card h-100">
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between">
+                      <div>
+                        <h6 className="card-title text-muted mb-2">Tidak Aktif</h6>
+                        <h3 className="mb-0">
+                          {data.filter(item => 
+                            !item.status || (
+                              !item.status.toLowerCase().includes("active") && 
+                              !item.status.toLowerCase().includes("on progress") &&
+                              !item.status.toLowerCase().includes("pending")
+                            )
+                          ).length}
+                        </h3>
+                      </div>
+                      <div className="align-self-center">
+                        <i className="fas fa-times-circle fa-2x text-secondary"></i>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="col-md-3 mb-3">
-              <div className="card stats-card h-100">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between">
-                    <div>
-                      <h6 className="card-title text-muted mb-2">Active</h6>
-                      <h3 className="mb-0">
+          </div>
+
+          {/* Stats Cards - Mobile */}
+          <div className="d-md-none stats-row-mobile">
+            <div className="row">
+              <div className="col-6 mb-2">
+                <div className="card stats-card stats-card-mobile">
+                  <div className="card-body py-2">
+                    <div className="text-center">
+                      <h6 className="card-title text-muted mb-1">Total</h6>
+                      <h4 className="mb-0 text-primary">{data.length}</h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="col-6 mb-2">
+                <div className="card stats-card stats-card-mobile">
+                  <div className="card-body py-2">
+                    <div className="text-center">
+                      <h6 className="card-title text-muted mb-1">Aktif</h6>
+                      <h4 className="mb-0 text-success">
                         {data.filter(item => 
-  item.status && (
-    item.status.toLowerCase().includes("active") || 
-    item.status.toLowerCase().includes("on progress")
-  )
-).length}
-                      </h3>
-                    </div>
-                    <div className="align-self-center">
-                      <i className="fas fa-check-circle fa-2x text-success"></i>
+                          item.status && (
+                            item.status.toLowerCase().includes("active") || 
+                            item.status.toLowerCase().includes("on progress")
+                          )
+                        ).length}
+                      </h4>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="col-md-3 mb-3">
-              <div className="card stats-card h-100">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between">
-                    <div>
-                      <h6 className="card-title text-muted mb-2">Pending</h6>
-                      <h3 className="mb-0">
+              <div className="col-6 mb-2">
+                <div className="card stats-card stats-card-mobile">
+                  <div className="card-body py-2">
+                    <div className="text-center">
+                      <h6 className="card-title text-muted mb-1">Menunggu</h6>
+                      <h4 className="mb-0 text-warning">
                         {data.filter(item => 
                           item.status && item.status.toLowerCase().includes("pending")
                         ).length}
-                      </h3>
-                    </div>
-                    <div className="align-self-center">
-                      <i className="fas fa-clock fa-2x text-warning"></i>
+                      </h4>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="col-md-3 mb-3">
-              <div className="card stats-card h-100">
-                <div className="card-body">
-                  <div className="d-flex justify-content-between">
-                    <div>
-                      <h6 className="card-title text-muted mb-2">Inactive</h6>
-                      <h3 className="mb-0">
+              <div className="col-6 mb-2">
+                <div className="card stats-card stats-card-mobile">
+                  <div className="card-body py-2">
+                    <div className="text-center">
+                      <h6 className="card-title text-muted mb-1">Nonaktif</h6>
+                      <h4 className="mb-0 text-secondary">
                         {data.filter(item => 
-  !item.status || (
-    !item.status.toLowerCase().includes("active") && 
-    !item.status.toLowerCase().includes("on progress") &&
-    !item.status.toLowerCase().includes("pending")
-  )
-).length}
-                      </h3>
-                    </div>
-                    <div className="align-self-center">
-                      <i className="fas fa-times-circle fa-2x text-secondary"></i>
+                          !item.status || (
+                            !item.status.toLowerCase().includes("active") && 
+                            !item.status.toLowerCase().includes("on progress") &&
+                            !item.status.toLowerCase().includes("pending")
+                          )
+                        ).length}
+                      </h4>
                     </div>
                   </div>
                 </div>
@@ -521,7 +712,7 @@ React.useEffect(() => {
                 <input
                   type="text"
                   className="form-control search-box border-start-0"
-                  placeholder="Search clients by name, type, or status..."
+                  placeholder="Cari client berdasarkan nama, jenis sistem, atau status..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -529,14 +720,14 @@ React.useEffect(() => {
             </div>
             <div className="col-md-6 d-flex justify-content-md-end mt-2 mt-md-0">
               <div className="d-flex align-items-center">
-                <span className="me-2 text-muted">Show:</span>
-                <span className="badge bg-primary">{filteredData.length} clients</span>
+                <span className="me-2 text-muted">Tampilkan:</span>
+                <span className="badge bg-primary">{filteredData.length} client</span>
               </div>
             </div>
           </div>
 
-          {/* Table */}
-          <div className="table-container">
+          {/* Desktop Table */}
+          <div className="d-none d-md-block table-container">
             <div className="table-responsive">
               <table className="table table-hover mb-0">
                 <thead>
@@ -557,22 +748,21 @@ React.useEffect(() => {
                               {item.nama ? item.nama.charAt(0).toUpperCase() : 'C'}
                             </div>
                             <div>
-                              <div className="fw-bold">{item.nama || 'Unnamed Client'}</div>
-                              <small className="text-muted">ID: {item.id}</small>
+                              <div className="fw-bold">{item.nama || 'Client Tanpa Nama'}</div>
                             </div>
                           </div>
                         </td>
                         <td className="align-middle">
                           <span className="badge bg-light text-dark">
-                            {item.jenis || 'Not specified'}
+                            {item.jenis || 'Tidak ditentukan'}
                           </span>
                         </td>
                         <td className="align-middle" title={`Deadline: ${item.waktu}`}>
-  {calculateDaysRemaining(item.waktu)}
-</td>
+                          {calculateDaysRemaining(item.waktu)}
+                        </td>
                         <td className="align-middle">
                           <span className={`status-badge ${getStatusBadgeClass(item.status)}`}>
-                            {item.status || 'Inactive'}
+                            {item.status || 'Tidak Aktif'}
                           </span>
                         </td>
                       </tr>
@@ -583,17 +773,17 @@ React.useEffect(() => {
                         {loading ? (
                           <div className="d-flex justify-content-center">
                             <div className="spinner-border text-primary" role="status">
-                              <span className="visually-hidden">Loading...</span>
+                              <span className="visually-hidden">Memuat...</span>
                             </div>
                           </div>
                         ) : (
                           <div className="empty-state">
                             <i className="fas fa-inbox"></i>
-                            <h5>No clients found</h5>
+                            <h5>Tidak ada client ditemukan</h5>
                             <p>
                               {searchTerm ? 
-                                "No clients match your search criteria" : 
-                                "No clients in the database yet"
+                                "Tidak ada client yang sesuai dengan pencarian" : 
+                                "Belum ada client di database"
                               }
                             </p>
                           </div>
@@ -604,6 +794,34 @@ React.useEffect(() => {
                 </tbody>
               </table>
             </div>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="d-md-none">
+            {currentItems.length > 0 ? (
+              renderMobileCards()
+            ) : (
+              <div className="text-center py-5">
+                {loading ? (
+                  <div className="d-flex justify-content-center">
+                    <div className="spinner-border text-primary" role="status">
+                      <span className="visually-hidden">Memuat...</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="empty-state">
+                    <i className="fas fa-inbox"></i>
+                    <h5>Tidak ada client ditemukan</h5>
+                    <p>
+                      {searchTerm ? 
+                        "Tidak ada client yang sesuai dengan pencarian" : 
+                        "Belum ada client di database"
+                      }
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Pagination */}
