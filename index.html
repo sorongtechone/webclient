@@ -398,38 +398,43 @@
         }
       };
 
-      const calculateDaysRemaining = (deadlineDate) => {
-        if (!deadlineDate) return "-";
-        
-        try {
-          // Parse tanggal deadline (format: DD/MM/YYYY)
-          const [day, month, year] = deadlineDate.split('/').map(Number);
-          const deadline = new Date(year, month - 1, day);
-          
-          const today = new Date();
-          
-          // Reset waktu ke 00:00:00 untuk perhitungan yang akurat
-          today.setHours(0, 0, 0, 0);
-          deadline.setHours(0, 0, 0, 0);
-          
-          const diffTime = deadline - today;
-          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-          
-          if (diffDays === 0) {
-            return "Hari ini";
-          } else if (diffDays === 1) {
-            return "1 hari lagi";
-          } else if (diffDays > 1) {
-            return `${diffDays} hari lagi`;
-          } else if (diffDays === -1) {
-            return "1 hari terlambat";
-          } else {
-            return `${Math.abs(diffDays)} hari terlambat`;
-          }
-        } catch (e) {
-          return deadlineDate;
-        }
-      };
+      const calculateDaysRemaining = (deadlineDate, status) => {
+  if (!deadlineDate) return "-";
+  
+  try {
+    // Parse tanggal deadline (format: DD/MM/YYYY)
+    const [day, month, year] = deadlineDate.split('/').map(Number);
+    const deadline = new Date(year, month - 1, day);
+    
+    const today = new Date();
+    
+    // Reset waktu ke 00:00:00 untuk perhitungan yang akurat
+    today.setHours(0, 0, 0, 0);
+    deadline.setHours(0, 0, 0, 0);
+    
+    const diffTime = deadline - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // LOGIKA BARU: Jika status pending dan lebih dari 15 hari, tampilkan "Tidak Diketahui"
+    if (status && status.toLowerCase().includes("pending") && diffDays > 15) {
+      return "Tidak Diketahui";
+    }
+    
+    if (diffDays === 0) {
+      return "Hari ini";
+    } else if (diffDays === 1) {
+      return "1 hari lagi";
+    } else if (diffDays > 1) {
+      return `${diffDays} hari lagi`;
+    } else if (diffDays === -1) {
+      return "1 hari terlambat";
+    } else {
+      return `${Math.abs(diffDays)} hari terlambat`;
+    }
+  } catch (e) {
+    return deadlineDate;
+  }
+};
 
       const [currentTime, setCurrentTime] = React.useState(new Date());
 
