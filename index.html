@@ -374,24 +374,37 @@ const sortedArr = arr.sort((a, b) => {
       }, [searchTerm, data]);
 
       const handleRefresh = () => {
-        setLoading(true);
-        const refDb = db.ref("client");
-        refDb.once("value").then((snap) => {
-          const val = snap.val();
-          setLoading(false);
-          setLastUpdated(new Date());
-          
-          if (!val) {
-            setData([]);
-            setFilteredData([]);
-            return;
-          }
+  setLoading(true);
+  const refDb = db.ref("client");
+  refDb.once("value").then((snap) => {
+    const val = snap.val();
+    setLoading(false);
+    setLastUpdated(new Date());
+    
+    if (!val) {
+      setData([]);
+      setFilteredData([]);
+      return;
+    }
 
-          const arr = Object.keys(val).map((id) => ({ id, ...val[id] }));
-          setData(arr);
-          setFilteredData(arr);
-        });
+    const arr = Object.keys(val).map((id) => ({ id, ...val[id] }));
+
+    // URUTKAN DATA SEPERTI DI USEFFECT UTAMA
+    const sortedArr = arr.sort((a, b) => {
+      const getStatusPriority = (status) => {
+        if (!status) return 3;
+        const statusLower = status.toLowerCase();
+        if (statusLower.includes("active") || statusLower.includes("on progress")) return 1;
+        if (statusLower.includes("pending")) return 2;
+        return 3;
       };
+      return getStatusPriority(a.status) - getStatusPriority(b.status);
+    });
+
+    setData(sortedArr);  // ← SET DATA YANG SUDAH DIURUTKAN
+    setFilteredData(sortedArr);
+  });
+};
 
       const getStatusBadgeClass = (status) => {
         if (!status) return "status-inactive";
