@@ -317,18 +317,26 @@
           const arr = Object.keys(val).map((id) => ({ id, ...val[id] }));
 
           // Urutkan data: On progress -> Pending -> Inactive -> lainnya
-          const sortedArr = arr.sort((a, b) => {
-            const getStatusPriority = (status) => {
-              if (!status) return 3; // Inactive
-              const statusLower = status.toLowerCase();
-              if (statusLower.includes("on progress")) return 1; // Paling tinggi
-              if (statusLower.includes("pending")) return 2;
-              if (statusLower.includes("active")) return 1;
-              return 3; // Inactive/others
-            };
-            
-            return getStatusPriority(a.status) - getStatusPriority(b.status);
-          });
+          // Urutkan data: On progress/Active -> Pending -> Inactive
+const sortedArr = arr.sort((a, b) => {
+  const getStatusPriority = (status) => {
+    if (!status) return 3; // No status = Inactive
+    const statusLower = status.toLowerCase();
+    
+    // Priority 1: Active & On Progress
+    if (statusLower.includes("active") || statusLower.includes("on progress")) {
+      return 1;
+    }
+    // Priority 2: Pending
+    if (statusLower.includes("pending")) {
+      return 2;
+    }
+    // Priority 3: Inactive & lainnya
+    return 3;
+  };
+  
+  return getStatusPriority(a.status) - getStatusPriority(b.status);
+});
 
           setData(sortedArr);
           setFilteredData(sortedArr);
@@ -398,39 +406,44 @@
         }
       };
 
-      const calculateDaysRemaining = (deadlineDate, status) => {
+      // Hitung sisa hari hingga deadline
+function calculateDaysRemaining(deadlineDate, status) {
   if (!deadlineDate) return "-";
-  
   try {
-    // Parse tanggal deadline (format: DD/MM/YYYY)
-    const [day, month, year] = deadlineDate.split('/').map(Number);
-    const deadline = new Date(year, month - 1, day);
+    let day, month, year;
     
+    if (deadlineDate.includes('/')) {
+      [day, month, year] = deadlineDate.split('/').map(Number);
+    } else if (deadlineDate.includes('-')) {
+      [year, month, day] = deadlineDate.split('-').map(Number);
+    } else {
+      return deadlineDate;
+    }
+    
+    const deadline = new Date(year, month - 1, day);
     const today = new Date();
     
-    // Reset waktu ke 00:00:00 untuk perhitungan yang akurat
     today.setHours(0, 0, 0, 0);
     deadline.setHours(0, 0, 0, 0);
     
     const diffTime = deadline - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    // LOGIKA BARU: Jika status pending dan lebih dari 15 hari, tampilkan "Tidak Diketahui"
-    if (status && status.toLowerCase().includes("pending") && diffDays > 15) {
+    // LOGIKA BARU: Jika status BUKAN on progress dan lebih dari 15 hari, tampilkan "Tidak Diketahui"
+    const isOnProgress = status && (
+      status.toLowerCase().includes("on progress") || 
+      status.toLowerCase().includes("active")
+    );
+    
+    if (!isOnProgress && diffDays > 15) {
       return "Tidak Diketahui";
     }
     
-    if (diffDays === 0) {
-      return "Hari ini";
-    } else if (diffDays === 1) {
-      return "1 hari lagi";
-    } else if (diffDays > 1) {
-      return `${diffDays} hari lagi`;
-    } else if (diffDays === -1) {
-      return "1 hari terlambat";
-    } else {
-      return `${Math.abs(diffDays)} hari terlambat`;
-    }
+    if (diffDays === 0) return "Hari ini";
+    if (diffDays === 1) return "1 hari lagi";
+    if (diffDays > 1) return `${diffDays} hari lagi`;
+    if (diffDays === -1) return "1 hari terlambat";
+    return `${Math.abs(diffDays)} hari terlambat`;
   } catch (e) {
     return deadlineDate;
   }
