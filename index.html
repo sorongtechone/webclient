@@ -90,7 +90,10 @@
       background-color: #f5f7fb;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-    
+    .status-completed {
+  background-color: rgba(40, 167, 69, 0.2);
+  color: #1e7e34;
+}
     .dashboard-header {
       background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
       color: white;
@@ -318,20 +321,20 @@
 
           // Urutkan data: On progress -> Pending -> Inactive -> lainnya
           // Urutkan data: On progress/Active -> Pending -> Inactive
+// Urutkan data: On progress -> Pending -> Inactive -> Completed (paling bawah)
 const sortedArr = arr.sort((a, b) => {
   const getStatusPriority = (status) => {
-    if (!status) return 3; // No status = Inactive
+    if (!status) return 3;
     const statusLower = status.toLowerCase();
     
-    // Priority 1: Active & On Progress
-    if (statusLower.includes("active") || statusLower.includes("on progress")) {
-      return 1;
-    }
+    // Priority 1: Active & On Progress (paling atas)
+    if (statusLower.includes("active") || statusLower.includes("on progress")) return 1;
     // Priority 2: Pending
-    if (statusLower.includes("pending")) {
-      return 2;
-    }
+    if (statusLower.includes("pending")) return 2;
     // Priority 3: Inactive & lainnya
+    if (statusLower.includes("inactive") || statusLower.includes("belum tau")) return 3;
+    // Priority 4: Completed (paling bawah - udah selesai)
+    if (statusLower.includes("completed")) return 4;
     return 3;
   };
   
@@ -407,20 +410,28 @@ const sortedArr = arr.sort((a, b) => {
 };
 
       const getStatusBadgeClass = (status) => {
-        if (!status) return "status-inactive";
-        
-        const statusLower = status.toLowerCase();
-        if (statusLower.includes("active") || statusLower.includes("on progress")) {
-          return "status-active";
-        } else if (statusLower.includes("pending") || statusLower.includes("menunggu")) {
-          return "status-pending";
-        } else {
-          return "status-inactive";
-        }
-      };
+  if (!status) return "status-inactive";
+  
+  const statusLower = status.toLowerCase();
+  if (statusLower.includes("active") || statusLower.includes("on progress")) {
+    return "status-active";
+  } else if (statusLower.includes("pending") || statusLower.includes("menunggu")) {
+    return "status-pending";
+  } else if (statusLower.includes("completed") || statusLower.includes("selesai")) {
+    return "status-completed";
+  } else {
+    return "status-inactive";
+  }
+};
 
       // Hitung sisa hari hingga deadline
+// Hitung sisa hari hingga deadline
 function calculateDaysRemaining(deadlineDate, status) {
+  // Jika status Completed, langsung return "-"
+  if (status && status.toLowerCase().includes("completed")) {
+    return "100%";
+  }
+  
   if (!deadlineDate) return "-";
   try {
     let day, month, year;
@@ -460,7 +471,7 @@ function calculateDaysRemaining(deadlineDate, status) {
   } catch (e) {
     return deadlineDate;
   }
-};
+}
       const [currentTime, setCurrentTime] = React.useState(new Date());
 
       // Timer effect
@@ -594,178 +605,233 @@ const renderMobileCards = () => {
           </div>
 
           {/* Stats Cards - Desktop */}
-          <div className="d-none d-md-block">
-            <div className="row mb-4">
-              <div className="col-md-3 mb-3">
-                <div className="card stats-card h-100">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between">
-                      <div>
-                        <h6 className="card-title text-muted mb-2">Total Client</h6>
-                        <h3 className="mb-0">{data.length}</h3>
-                      </div>
-                      <div className="align-self-center">
-                        <i className="fas fa-users fa-2x text-primary"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3 mb-3">
-                <div className="card stats-card h-100">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between">
-                      <div>
-                        <h6 className="card-title text-muted mb-2">Aktif</h6>
-                        <h3 className="mb-0">
-                          {data.filter(item => 
-                            item.status && (
-                              item.status.toLowerCase().includes("active") || 
-                              item.status.toLowerCase().includes("on progress")
-                            )
-                          ).length}
-                        </h3>
-                      </div>
-                      <div className="align-self-center">
-                        <i className="fas fa-check-circle fa-2x text-success"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3 mb-3">
-                <div className="card stats-card h-100">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between">
-                      <div>
-                        <h6 className="card-title text-muted mb-2">Menunggu</h6>
-                        <h3 className="mb-0">
-                          {data.filter(item => 
-                            item.status && item.status.toLowerCase().includes("pending")
-                          ).length}
-                        </h3>
-                      </div>
-                      <div className="align-self-center">
-                        <i className="fas fa-clock fa-2x text-warning"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-md-3 mb-3">
-                <div className="card stats-card h-100">
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between">
-                      <div>
-                        <h6 className="card-title text-muted mb-2">Tidak Aktif</h6>
-                        <h3 className="mb-0">
-                          {data.filter(item => 
-                            !item.status || (
-                              !item.status.toLowerCase().includes("active") && 
-                              !item.status.toLowerCase().includes("on progress") &&
-                              !item.status.toLowerCase().includes("pending")
-                            )
-                          ).length}
-                        </h3>
-                      </div>
-                      <div className="align-self-center">
-                        <i className="fas fa-times-circle fa-2x text-secondary"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+{/* Stats Cards - Desktop */}
+<div className="d-none d-md-block">
+  <div className="row mb-4">
+    <div className="col-md-3 mb-3">
+      <div className="card stats-card h-100">
+        <div className="card-body">
+          <div className="d-flex justify-content-between">
+            <div>
+              <h6 className="card-title text-muted mb-2">Total Client</h6>
+              <h3 className="mb-0">{data.length}</h3>
+            </div>
+            <div className="align-self-center">
+              <i className="fas fa-users fa-2x text-primary"></i>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+    <div className="col-md-2 mb-3">
+      <div className="card stats-card h-100">
+        <div className="card-body">
+          <div className="d-flex justify-content-between">
+            <div>
+              <h6 className="card-title text-muted mb-2">Aktif</h6>
+              <h3 className="mb-0">
+                {data.filter(item => 
+                  item.status && (
+                    item.status.toLowerCase().includes("active") || 
+                    item.status.toLowerCase().includes("on progress")
+                  )
+                ).length}
+              </h3>
+            </div>
+            <div className="align-self-center">
+              <i className="fas fa-check-circle fa-2x text-success"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div className="col-md-2 mb-3">
+      <div className="card stats-card h-100">
+        <div className="card-body">
+          <div className="d-flex justify-content-between">
+            <div>
+              <h6 className="card-title text-muted mb-2">Menunggu</h6>
+              <h3 className="mb-0">
+                {data.filter(item => 
+                  item.status && item.status.toLowerCase().includes("pending")
+                ).length}
+              </h3>
+            </div>
+            <div className="align-self-center">
+              <i className="fas fa-clock fa-2x text-warning"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div className="col-md-2 mb-3">
+      <div className="card stats-card h-100">
+        <div className="card-body">
+          <div className="d-flex justify-content-between">
+            <div>
+              <h6 className="card-title text-muted mb-2">Tidak Aktif</h6>
+              <h3 className="mb-0">
+                {data.filter(item => 
+                  !item.status || (
+                    !item.status.toLowerCase().includes("active") && 
+                    !item.status.toLowerCase().includes("on progress") &&
+                    !item.status.toLowerCase().includes("pending") &&
+                    !item.status.toLowerCase().includes("completed")
+                  )
+                ).length}
+              </h3>
+            </div>
+            <div className="align-self-center">
+              <i className="fas fa-times-circle fa-2x text-secondary"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div className="col-md-3 mb-3">
+      <div className="card stats-card h-100">
+        <div className="card-body">
+          <div className="d-flex justify-content-between">
+            <div>
+              <h6 className="card-title text-muted mb-2">Selesai</h6>
+              <h3 className="mb-0 text-success">
+                {data.filter(item => 
+                  item.status && item.status.toLowerCase().includes("completed")
+                ).length}
+              </h3>
+              <small className="text-muted">
+                {Math.round((data.filter(item => 
+                  item.status && item.status.toLowerCase().includes("completed")
+                ).length / data.length) * 100)}% dari total
+              </small>
+            </div>
+            <div className="align-self-center">
+              <i className="fas fa-flag-checkered fa-2x text-success"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
           {/* Stats Cards - Mobile */}
-          <div className="d-md-none stats-row-mobile">
-            <div className="row">
-              <div className="col-6 mb-2">
-                <div className="card stats-card stats-card-mobile">
-                  <div className="card-body py-2">
-                    <div className="text-center">
-                      <h6 className="card-title text-muted mb-1">Total</h6>
-                      <h4 className="mb-0 text-primary">{data.length}</h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-6 mb-2">
-                <div className="card stats-card stats-card-mobile">
-                  <div className="card-body py-2">
-                    <div className="text-center">
-                      <h6 className="card-title text-muted mb-1">Aktif</h6>
-                      <h4 className="mb-0 text-success">
-                        {data.filter(item => 
-                          item.status && (
-                            item.status.toLowerCase().includes("active") || 
-                            item.status.toLowerCase().includes("on progress")
-                          )
-                        ).length}
-                      </h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-6 mb-2">
-                <div className="card stats-card stats-card-mobile">
-                  <div className="card-body py-2">
-                    <div className="text-center">
-                      <h6 className="card-title text-muted mb-1">Menunggu</h6>
-                      <h4 className="mb-0 text-warning">
-                        {data.filter(item => 
-                          item.status && item.status.toLowerCase().includes("pending")
-                        ).length}
-                      </h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="col-6 mb-2">
-                <div className="card stats-card stats-card-mobile">
-                  <div className="card-body py-2">
-                    <div className="text-center">
-                      <h6 className="card-title text-muted mb-1">Nonaktif</h6>
-                      <h4 className="mb-0 text-secondary">
-                        {data.filter(item => 
-                          !item.status || (
-                            !item.status.toLowerCase().includes("active") && 
-                            !item.status.toLowerCase().includes("on progress") &&
-                            !item.status.toLowerCase().includes("pending")
-                          )
-                        ).length}
-                      </h4>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+{/* Stats Cards - Mobile */}
+<div className="d-md-none stats-row-mobile">
+  <div className="row">
+    <div className="col-6 mb-2">
+      <div className="card stats-card stats-card-mobile">
+        <div className="card-body py-2">
+          <div className="text-center">
+            <h6 className="card-title text-muted mb-1">Total</h6>
+            <h4 className="mb-0 text-primary">{data.length}</h4>
           </div>
+        </div>
+      </div>
+    </div>
+    <div className="col-6 mb-2">
+      <div className="card stats-card stats-card-mobile">
+        <div className="card-body py-2">
+          <div className="text-center">
+            <h6 className="card-title text-muted mb-1">Selesai</h6>
+            <h4 className="mb-0 text-success">
+              {data.filter(item => 
+                item.status && item.status.toLowerCase().includes("completed")
+              ).length}
+            </h4>
+            <small className="text-muted">
+              {Math.round((data.filter(item => 
+                item.status && item.status.toLowerCase().includes("completed")
+              ).length / data.length) * 100)}%
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div className="col-4 mb-2">
+      <div className="card stats-card stats-card-mobile">
+        <div className="card-body py-2">
+          <div className="text-center">
+            <h6 className="card-title text-muted mb-1">Aktif</h6>
+            <h4 className="mb-0 text-success">
+              {data.filter(item => 
+                item.status && (
+                  item.status.toLowerCase().includes("active") || 
+                  item.status.toLowerCase().includes("on progress")
+                )
+              ).length}
+            </h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div className="col-4 mb-2">
+      <div className="card stats-card stats-card-mobile">
+        <div className="card-body py-2">
+          <div className="text-center">
+            <h6 className="card-title text-muted mb-1">Menunggu</h6>
+            <h4 className="mb-0 text-warning">
+              {data.filter(item => 
+                item.status && item.status.toLowerCase().includes("pending")
+              ).length}
+            </h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div className="col-4 mb-2">
+      <div className="card stats-card stats-card-mobile">
+        <div className="card-body py-2">
+          <div className="text-center">
+            <h6 className="card-title text-muted mb-1">Nonaktif</h6>
+            <h4 className="mb-0 text-secondary">
+              {data.filter(item => 
+                !item.status || (
+                  !item.status.toLowerCase().includes("active") && 
+                  !item.status.toLowerCase().includes("on progress") &&
+                  !item.status.toLowerCase().includes("pending") &&
+                  !item.status.toLowerCase().includes("completed")
+                )
+              ).length}
+            </h4>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
           {/* Search and Controls */}
-          <div className="row mb-3">
-            <div className="col-md-6">
-              <div className="input-group">
-                <span className="input-group-text bg-white border-end-0">
-                  <i className="fas fa-search text-muted"></i>
-                </span>
-                <input
-                  type="text"
-                  className="form-control search-box border-start-0"
-                  placeholder="Cari client berdasarkan nama, jenis sistem, atau status..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="col-md-6 d-flex justify-content-md-end mt-2 mt-md-0">
-              <div className="d-flex align-items-center">
-                <span className="me-2 text-muted">Tampilkan:</span>
-                <span className="badge bg-primary">{filteredData.length} client</span>
-              </div>
-            </div>
-          </div>
+          {/* Search and Controls */}
+<div className="row mb-3">
+  <div className="col-md-6">
+    <div className="input-group">
+      <span className="input-group-text bg-white border-end-0">
+        <i className="fas fa-search text-muted"></i>
+      </span>
+      <input
+        type="text"
+        className="form-control search-box border-start-0"
+        placeholder="Cari client berdasarkan nama, jenis sistem, atau status..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+    </div>
+  </div>
+  <div className="col-md-6 d-flex justify-content-md-end mt-2 mt-md-0">
+    <div className="d-flex align-items-center">
+      <span className="me-2 text-muted">Total Selesai:</span>
+      <span className="badge bg-success">
+        {data.filter(item => 
+          item.status && item.status.toLowerCase().includes("completed")
+        ).length} client
+        <small className="ms-1">({Math.round((data.filter(item => 
+          item.status && item.status.toLowerCase().includes("completed")
+        ).length / data.length) * 100)}%)</small>
+      </span>
+    </div>
+  </div>
+</div>
 
           {/* Desktop Table */}
           <div className="d-none d-md-block table-container">
