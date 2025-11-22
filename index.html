@@ -518,46 +518,51 @@ function calculateDaysRemaining(deadlineDate, status) {
       };
 
       // Render mobile cards
-      const renderMobileCards = () => {
-        return currentItems.map(item => (
-          <div key={item.id} className="card mobile-card">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-start mb-2">
-                <div className="d-flex align-items-center">
-                  <div className="client-avatar">
-                    {item.nama ? item.nama.charAt(0).toUpperCase() : 'C'}
-                      {/* BADGE NOMOR KECIL DI POJOK */}
+// Render mobile cards - PERBAIKI INI
+const renderMobileCards = () => {
+  return currentItems.map((item, index) => (  // TAMBAH PARAMETER INDEX
+    <div key={item.id} className="card mobile-card">
+      <div className="card-body">
+        <div className="d-flex justify-content-between align-items-start mb-2">
+          <div className="d-flex align-items-center">
+            <div className="position-relative">  {/* TAMBAH DIV POSITION-RELATIVE */}
+              <div className="client-avatar">
+                {item.nama ? item.nama.charAt(0).toUpperCase() : 'C'}
+              </div>
+              {/* BADGE NOMOR KECIL DI POJOK */}
               <span className="position-absolute top-0 start-100 translate-middle badge bg-primary rounded-pill" 
                     style={{fontSize: '0.5rem', minWidth: '16px', height: '16px'}}>
                 {startIndex + index + 1}
-                  </div>
-                  <div>
-                    <h6 className="mb-0 fw-bold">
-                                       <span className="text-primary me-2">#{startIndex + index + 1}</span>
-{item.nama || 'Client Tanpa Nama'}</h6>
-                  </div>
-                </div>
-                <span className={`status-badge ${getStatusBadgeClass(item.status)}`}>
-                  {item.status || 'Tidak Aktif'}
-                </span>
-              </div>
-              
-              <div className="row mt-2">
-                <div className="col-6">
-                  <small className="text-muted">Jenis Sistem</small>
-                  <div className="fw-medium">{item.jenis || 'Tidak ditentukan'}</div>
-                </div>
-                <div className="col-6">
-                  <small className="text-muted">Deadline</small>
-                  <div className="fw-medium" title={`Tanggal: ${item.waktu}`}>
-  {calculateDaysRemaining(item.waktu, item.status)}
-</div>
-                </div>
-              </div>
+              </span>
+            </div>
+            <div className="ms-3">
+              <h6 className="mb-0 fw-bold">
+                <span className="text-primary me-2">#{startIndex + index + 1}</span>
+                {item.nama || 'Client Tanpa Nama'}
+              </h6>
             </div>
           </div>
-        ));
-      };
+          <span className={`status-badge ${getStatusBadgeClass(item.status)}`}>
+            {item.status || 'Tidak Aktif'}
+          </span>
+        </div>
+        
+        <div className="row mt-2">
+          <div className="col-6">
+            <small className="text-muted">Jenis Sistem</small>
+            <div className="fw-medium">{item.jenis || 'Tidak ditentukan'}</div>
+          </div>
+          <div className="col-6">
+            <small className="text-muted">Deadline</small>
+            <div className="fw-medium" title={`Tanggal: ${item.waktu}`}>
+              {calculateDaysRemaining(item.waktu, item.status)}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  ));
+};
 
       return (
         <div className="container-fluid">
@@ -768,6 +773,7 @@ function calculateDaysRemaining(deadlineDate, status) {
               <table className="table table-hover mb-0">
                 <thead>
                   <tr>
+                     <th>No</th>
                     <th>Nama Client</th>
                     <th>Jenis Sistem</th>
                     <th>Waktu Pengerjaan</th>
@@ -806,7 +812,7 @@ function calculateDaysRemaining(deadlineDate, status) {
               </td>
             </tr>
           ))
-        ) : : (
+        )  : (
                     <tr>
                       <td colSpan="4" className="text-center py-5">
                         {loading ? (
