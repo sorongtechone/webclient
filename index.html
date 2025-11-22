@@ -606,8 +606,10 @@ const renderMobileCards = () => {
 
           {/* Stats Cards - Desktop */}
 {/* Stats Cards - Desktop */}
+{/* Stats Cards - Desktop */}
 <div className="d-none d-md-block">
   <div className="row mb-4">
+    {/* Total Client */}
     <div className="col-md-3 mb-3">
       <div className="card stats-card h-100">
         <div className="card-body">
@@ -623,71 +625,8 @@ const renderMobileCards = () => {
         </div>
       </div>
     </div>
-    <div className="col-md-2 mb-3">
-      <div className="card stats-card h-100">
-        <div className="card-body">
-          <div className="d-flex justify-content-between">
-            <div>
-              <h6 className="card-title text-muted mb-2">Aktif</h6>
-              <h3 className="mb-0">
-                {data.filter(item => 
-                  item.status && (
-                    item.status.toLowerCase().includes("active") || 
-                    item.status.toLowerCase().includes("on progress")
-                  )
-                ).length}
-              </h3>
-            </div>
-            <div className="align-self-center">
-              <i className="fas fa-check-circle fa-2x text-success"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div className="col-md-2 mb-3">
-      <div className="card stats-card h-100">
-        <div className="card-body">
-          <div className="d-flex justify-content-between">
-            <div>
-              <h6 className="card-title text-muted mb-2">Pending</h6>
-              <h3 className="mb-0">
-                {data.filter(item => 
-                  item.status && item.status.toLowerCase().includes("pending")
-                ).length}
-              </h3>
-            </div>
-            <div className="align-self-center">
-              <i className="fas fa-clock fa-2x text-warning"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div className="col-md-2 mb-3">
-      <div className="card stats-card h-100">
-        <div className="card-body">
-          <div className="d-flex justify-content-between">
-            <div>
-              <h6 className="card-title text-muted mb-2">Tidak Aktif</h6>
-              <h3 className="mb-0">
-                {data.filter(item => 
-                  !item.status || (
-                    !item.status.toLowerCase().includes("active") && 
-                    !item.status.toLowerCase().includes("on progress") &&
-                    !item.status.toLowerCase().includes("pending") &&
-                    !item.status.toLowerCase().includes("completed")
-                  )
-                ).length}
-              </h3>
-            </div>
-            <div className="align-self-center">
-              <i className="fas fa-times-circle fa-2x text-secondary"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+
+    {/* Selesai */}
     <div className="col-md-3 mb-3">
       <div className="card stats-card h-100">
         <div className="card-body">
@@ -700,9 +639,10 @@ const renderMobileCards = () => {
                 ).length}
               </h3>
               <small className="text-muted">
-                {Math.round((data.filter(item => 
-                  item.status && item.status.toLowerCase().includes("completed")
-                ).length / data.length) * 100)}% dari total
+                {data.length > 0 ? 
+                  Math.round((data.filter(item => 
+                    item.status && item.status.toLowerCase().includes("completed")
+                  ).length / data.length) * 100) : 0}% dari total
               </small>
             </div>
             <div className="align-self-center">
@@ -712,13 +652,87 @@ const renderMobileCards = () => {
         </div>
       </div>
     </div>
+
+    {/* Belum Selesai */}
+    <div className="col-md-3 mb-3">
+      <div className="card stats-card h-100">
+        <div className="card-body">
+          <div className="d-flex justify-content-between">
+            <div>
+              <h6 className="card-title text-muted mb-2">Belum Selesai</h6>
+              <h3 className="mb-0 text-warning">
+                {data.filter(item => 
+                  !item.status || !item.status.toLowerCase().includes("completed")
+                ).length}
+              </h3>
+              <small className="text-muted">
+                Dalam proses pengerjaan
+              </small>
+            </div>
+            <div className="align-self-center">
+              <i className="fas fa-tasks fa-2x text-warning"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {/* Detail Status */}
+    <div className="col-md-3 mb-3">
+      <div className="card stats-card h-100">
+        <div className="card-body">
+          <h6 className="card-title text-muted mb-3">Detail Status</h6>
+          <div className="d-flex justify-content-between mb-2">
+            <span className="text-info">
+              <i className="fas fa-play-circle me-1"></i>
+              Aktif
+            </span>
+            <strong className="text-info">
+              {data.filter(item => 
+                item.status && (
+                  item.status.toLowerCase().includes("active") || 
+                  item.status.toLowerCase().includes("on progress")
+                )
+              ).length}
+            </strong>
+          </div>
+          <div className="d-flex justify-content-between mb-2">
+            <span className="text-warning">
+              <i className="fas fa-clock me-1"></i>
+              Pending
+            </span>
+            <strong className="text-warning">
+              {data.filter(item => 
+                item.status && item.status.toLowerCase().includes("pending")
+              ).length}
+            </strong>
+          </div>
+          <div className="d-flex justify-content-between">
+            <span className="text-secondary">
+              <i className="fas fa-pause-circle me-1"></i>
+              Nonaktif
+            </span>
+            <strong className="text-secondary">
+              {data.filter(item => 
+                !item.status || (
+                  !item.status.toLowerCase().includes("active") && 
+                  !item.status.toLowerCase().includes("on progress") &&
+                  !item.status.toLowerCase().includes("pending") &&
+                  !item.status.toLowerCase().includes("completed")
+                )
+              ).length}
+            </strong>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-          {/* Stats Cards - Mobile */}
-{/* Stats Cards - Mobile */}
+
 <div className="d-md-none stats-row-mobile">
   <div className="row">
+    {/* Total Semua */}
     <div className="col-6 mb-2">
       <div className="card stats-card stats-card-mobile">
         <div className="card-body py-2">
@@ -729,6 +743,8 @@ const renderMobileCards = () => {
         </div>
       </div>
     </div>
+    
+    {/* Selesai */}
     <div className="col-6 mb-2">
       <div className="card stats-card stats-card-mobile">
         <div className="card-body py-2">
@@ -739,21 +755,34 @@ const renderMobileCards = () => {
                 item.status && item.status.toLowerCase().includes("completed")
               ).length}
             </h4>
-            <small className="text-muted">
-              {Math.round((data.filter(item => 
-                item.status && item.status.toLowerCase().includes("completed")
-              ).length / data.length) * 100)}%
-            </small>
           </div>
         </div>
       </div>
     </div>
+    
+    {/* Belum Selesai */}
+    <div className="col-12 mb-2">
+      <div className="card stats-card stats-card-mobile">
+        <div className="card-body py-2">
+          <div className="text-center">
+            <h6 className="card-title text-muted mb-1">Belum Selesai</h6>
+            <h4 className="mb-0 text-warning">
+              {data.filter(item => 
+                !item.status || !item.status.toLowerCase().includes("completed")
+              ).length}
+            </h4>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {/* Detail Status Belum Selesai */}
     <div className="col-4 mb-2">
       <div className="card stats-card stats-card-mobile">
         <div className="card-body py-2">
           <div className="text-center">
             <h6 className="card-title text-muted mb-1">Aktif</h6>
-            <h4 className="mb-0 text-success">
+            <h4 className="mb-0 text-info">
               {data.filter(item => 
                 item.status && (
                   item.status.toLowerCase().includes("active") || 
@@ -765,6 +794,7 @@ const renderMobileCards = () => {
         </div>
       </div>
     </div>
+    
     <div className="col-4 mb-2">
       <div className="card stats-card stats-card-mobile">
         <div className="card-body py-2">
@@ -779,6 +809,7 @@ const renderMobileCards = () => {
         </div>
       </div>
     </div>
+    
     <div className="col-4 mb-2">
       <div className="card stats-card stats-card-mobile">
         <div className="card-body py-2">
@@ -818,19 +849,7 @@ const renderMobileCards = () => {
       />
     </div>
   </div>
-  <div className="col-md-6 d-flex justify-content-md-end mt-2 mt-md-0">
-    <div className="d-flex align-items-center">
-      <span className="me-2 text-muted">Total Selesai:</span>
-      <span className="badge bg-success">
-        {data.filter(item => 
-          item.status && item.status.toLowerCase().includes("completed")
-        ).length} client
-        <small className="ms-1">({Math.round((data.filter(item => 
-          item.status && item.status.toLowerCase().includes("completed")
-        ).length / data.length) * 100)}%)</small>
-      </span>
-    </div>
-  </div>
+
 </div>
 
           {/* Desktop Table */}
