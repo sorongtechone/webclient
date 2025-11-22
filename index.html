@@ -435,7 +435,6 @@
     return deadlineDate;
   }
 };
-
       const [currentTime, setCurrentTime] = React.useState(new Date());
 
       // Timer effect
@@ -519,8 +518,8 @@
                 <div className="col-6">
                   <small className="text-muted">Deadline</small>
                   <div className="fw-medium" title={`Tanggal: ${item.waktu}`}>
-                    {calculateDaysRemaining(item.waktu)}
-                  </div>
+  {calculateDaysRemaining(item.waktu, item.status)}
+</div>
                 </div>
               </div>
             </div>
@@ -763,8 +762,8 @@
                           </span>
                         </td>
                         <td className="align-middle" title={`Deadline: ${item.waktu}`}>
-                          {calculateDaysRemaining(item.waktu)}
-                        </td>
+  {calculateDaysRemaining(item.waktu, item.status)}
+</td>
                         <td className="align-middle">
                           <span className={`status-badge ${getStatusBadgeClass(item.status)}`}>
                             {item.status || 'Tidak Aktif'}
